@@ -4,11 +4,11 @@ package models
 type AggregationType string
 
 const (
-	AggNone AggregationType = "none"
-	AggSum  AggregationType = "sum"
-	AggAvg  AggregationType = "avg"
-	AggMin  AggregationType = "min"
-	AggMax  AggregationType = "max"
+	AggNone  AggregationType = "none"
+	AggSum   AggregationType = "sum"
+	AggAvg   AggregationType = "avg"
+	AggMin   AggregationType = "min"
+	AggMax   AggregationType = "max"
 	AggCount AggregationType = "count"
 )
 

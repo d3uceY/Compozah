@@ -2,16 +2,16 @@ package models
 
 // DashboardConfig is the complete configuration for a generated dashboard.
 type DashboardConfig struct {
-	Name           string            `json:"name"`
-	Description    string            `json:"description"`
-	Connection     ConnectionConfig  `json:"connection"`
-	TableName      string            `json:"tableName"`
-	TimestampCol   string            `json:"timestampCol"`
-	MachineCol     string            `json:"machineCol"`
-	Metrics        []Metric          `json:"metrics"`
-	Widgets        []WidgetInstance  `json:"widgets"`
-	RefreshSeconds int               `json:"refreshSeconds"`
-	OutputPath     string            `json:"outputPath"`
+	Name           string           `json:"name"`
+	Description    string           `json:"description"`
+	Connection     ConnectionConfig `json:"connection"`
+	TableName      string           `json:"tableName"`
+	TimestampCol   string           `json:"timestampCol"`
+	MachineCol     string           `json:"machineCol"`
+	Metrics        []Metric         `json:"metrics"`
+	Widgets        []WidgetInstance `json:"widgets"`
+	RefreshSeconds int              `json:"refreshSeconds"`
+	OutputPath     string           `json:"outputPath"`
 }
 
 // DefaultDashboard returns a sensible default configuration.

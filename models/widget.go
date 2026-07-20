@@ -48,11 +48,11 @@ func AllWidgets() []WidgetInfo {
 
 // WidgetInstance is a configured widget placed on a dashboard.
 type WidgetInstance struct {
-	ID       string     `json:"id"`
-	Type     WidgetType `json:"type"`
-	Title    string     `json:"title"`
-	MetricID string     `json:"metricId"`
-	Width    int        `json:"width"`  // grid columns
-	Height   int        `json:"height"` // grid rows
+	ID       string            `json:"id"`
+	Type     WidgetType        `json:"type"`
+	Title    string            `json:"title"`
+	MetricID string            `json:"metricId"`
+	Width    int               `json:"width"`  // grid columns
+	Height   int               `json:"height"` // grid rows
 	Config   map[string]string `json:"config"`
 }

@@ -17,6 +17,10 @@ export default function ConnectionPanel({ config, onChange, onConnected }: Props
   };
 
   const handleConnect = async () => {
+    if (!config.port || config.port < 1 || config.port > 65535) {
+      setError('Port must be between 1 and 65535');
+      return;
+    }
     setConnecting(true);
     setError(null);
     try {
@@ -50,8 +54,11 @@ export default function ConnectionPanel({ config, onChange, onConnected }: Props
           <label>Port</label>
           <input
             type="number"
-            value={config.port}
-            onChange={(e) => update('port', parseInt(e.target.value) || 1433)}
+            value={config.port > 0 ? config.port : ''}
+            onChange={(e) => update('port', parseInt(e.target.value, 10) || 0)}
+            placeholder="1433"
+            min={1}
+            max={65535}
           />
         </div>
         <div className="form-group">

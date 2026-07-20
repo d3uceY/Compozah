@@ -41,6 +41,7 @@ function App() {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-brand">
+          <img src="/logo.png" className="brand-logo" alt="" />
           <div className="brand-name">Compozah</div>
           <div className="brand-tagline">Low-code dashboard builder</div>
         </div>

@@ -1,53 +1,105 @@
-# Welcome to Your New Wails3 Project!
+<p align="center">
+  <img src="build/appicon.png" alt="Compozah" width="96" />
+</p>
 
-Congratulations on generating your Wails3 application! This README will guide you through the next steps to get your project up and running.
+<h1 align="center">Compozah</h1>
+
+<p align="center">
+  <strong>A low-code dashboard builder that generates complete ASP.NET Core projects.</strong><br>
+  Connect to SQL Server, discover your schema, define metrics, choose widgets, and export a ready-to-run dashboard.
+</p>
+
+---
+
+## What It Does
+
+Compozah is a Wails v3 desktop application that streamlines building data dashboards from scratch.
+
+1. **Connect** to your SQL Server database
+2. **Explore** your schema — pick a table, map timestamp and machine columns
+3. **Define metrics** — attach aggregation logic (SUM, AVG, MIN, MAX, COUNT) to columns
+4. **Choose widgets** — drag and drop from 13 widget types (line charts, bar charts, KPIs, gauges, data tables, and more)
+5. **Generate** — Compozah produces a complete ASP.NET Core 8 project with Razor Pages, Chart.js dashboards, and a `Program.cs` wired to your database
+
+The generated project is a standalone solution — open it in Visual Studio or `dotnet run` and it starts serving your dashboard immediately.
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Desktop shell | [Wails v3](https://wails.io) (Go + WebView2) |
+| Backend | Go — SQL Server via `go-mssqldb`, template engine, ZIP exporter |
+| Frontend | React 19, TypeScript 6, Vite 8 |
+| Generated output | ASP.NET Core 8, Razor Pages, Chart.js |
 
 ## Getting Started
 
-1. Navigate to your project directory in the terminal.
+### Prerequisites
 
-2. To run your application in development mode, use the following command:
+- Go 1.24+
+- Node.js 22+
+- [Wails v3 CLI](https://v3.wails.io/getting-started/installation)
+- WebView2 runtime (bundled with Windows 11; installable on Windows 10)
 
-   ```
-   wails3 dev
-   ```
+### Development
 
-   This will start your application and enable hot-reloading for both frontend and backend changes.
+```powershell
+# Install frontend dependencies
+cd frontend
+npm install
+cd ..
 
-3. To build your application for production, use:
+# Run in dev mode (hot-reload for Go + frontend)
+wails3 dev
+```
 
-   ```
-   wails3 build
-   ```
+### Production Build
 
-   This will create a production-ready executable in the `build` directory.
+```powershell
+wails3 build
+```
 
-## Exploring Wails3 Features
-
-Now that you have your project set up, it's time to explore the features that Wails3 offers:
-
-1. **Check out the examples**: The best way to learn is by example. Visit the `examples` directory in the `v3/examples` directory to see various sample applications.
-
-2. **Run an example**: To run any of the examples, navigate to the example's directory and use:
-
-   ```
-   go run .
-   ```
-
-   Note: Some examples may be under development during the alpha phase.
-
-3. **Explore the documentation**: Visit the [Wails3 documentation](https://v3.wails.io/) for in-depth guides and API references.
-
-4. **Join the community**: Have questions or want to share your progress? Join the [Wails Discord](https://discord.gg/JDdSxwjhGf) or visit the [Wails discussions on GitHub](https://github.com/wailsapp/wails/discussions).
+The executable lands in `bin/compozah.exe`.
 
 ## Project Structure
 
-Take a moment to familiarize yourself with your project structure:
+```
+Compozah/
+├── main.go                  # App entry point, window config, service binding
+├── models/                  # Go data models (ConnectionConfig, Metric, Widget, DashboardConfig)
+├── services/                # Go services (database, config, template engine, generator, exporter)
+├── templates/aspnet-core/   # ASP.NET Core project templates with {{placeholders}}
+├── build/                   # Wails build config, platform scripts, icons
+├── frontend/                # React + Vite frontend
+│   ├── src/
+│   │   ├── components/      # ConnectionPanel, SchemaExplorer, MetricMapper, WidgetPalette, GeneratePanel
+│   │   ├── hooks/           # useWails (typed service bindings)
+│   │   └── types/           # TypeScript interfaces mirroring Go models
+│   └── public/              # Static assets (logo, etc.)
+└── Taskfile.yml             # Build task runner
+```
 
-- `frontend/`: Contains your frontend code (HTML, CSS, JavaScript/TypeScript)
-- `main.go`: The entry point of your Go backend
-- `app.go`: Define your application structure and methods here
-- `wails.json`: Configuration file for your Wails project
+## Widget Catalog
+
+| Widget | Description |
+|---|---|
+| Today's Consumption | Large KPI number showing today's total |
+| Hourly Trend | Line chart of hourly consumption |
+| Daily Trend | Bar chart of daily aggregates |
+| Weekly Comparison | Compare week-over-week by machine |
+| Monthly Trend | Line chart of monthly aggregates |
+| Machine Comparison | Side-by-side machine bars |
+| Pie Chart | Distribution pie chart |
+| Gauge | Current value within a range |
+| Data Table | Raw data with sorting |
+| KPI Card | Single key performance indicator |
+| Efficiency | Efficiency percentage display |
+| Cost | Cost calculation and trend |
+| Forecast | Predicted future trend |
+
+## Design
+
+The UI follows Apple's design language — SF Pro typography, parchment + white surfaces, a single Action Blue accent (#0066cc), pill-shaped CTAs, and edge-to-edge tiled sections. No emojis, no gradients, no decorative chrome. The product is the focus.
 
 ## Next Steps
 

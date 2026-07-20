@@ -32,7 +32,7 @@ export default function ConnectionPanel({ config, onChange, onConnected }: Props
   return (
     <div className="panel">
       <div className="panel-header">
-        <h2>🔌 SQL Server Connection</h2>
+        <h2>SQL Server Connection</h2>
         <p className="panel-subtitle">Connect to your database to discover tables and columns.</p>
       </div>
 

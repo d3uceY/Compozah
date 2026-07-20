@@ -7,12 +7,12 @@ import WidgetPalette from './components/WidgetPalette';
 import GeneratePanel from './components/GeneratePanel';
 import './App.css';
 
-const STEPS: { key: AppStep; label: string; icon: string }[] = [
-  { key: 'connect', label: 'Connect', icon: '🔌' },
-  { key: 'schema', label: 'Schema', icon: '🗄️' },
-  { key: 'metrics', label: 'Metrics', icon: '📐' },
-  { key: 'widgets', label: 'Widgets', icon: '🧩' },
-  { key: 'generate', label: 'Generate', icon: '🚀' },
+const STEPS: { key: AppStep; label: string }[] = [
+  { key: 'connect', label: 'Connect' },
+  { key: 'schema', label: 'Schema' },
+  { key: 'metrics', label: 'Metrics' },
+  { key: 'widgets', label: 'Widgets' },
+  { key: 'generate', label: 'Generate' },
 ];
 
 const DEFAULT_CONFIG: DashboardConfig = {
@@ -41,9 +41,8 @@ function App() {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <div className="brand-icon">⚡</div>
           <div className="brand-name">Compozah</div>
-          <div className="brand-tagline">Low-Code Dashboard Builder</div>
+          <div className="brand-tagline">Low-code dashboard builder</div>
         </div>
 
         <nav className="step-nav">
@@ -57,9 +56,8 @@ function App() {
                 onClick={() => goTo(s.key)}
                 disabled={idx > currentIdx && !isDone}
               >
-                <span className="step-icon">{isDone ? '✅' : s.icon}</span>
+                <span className="step-num">{isDone ? '✓' : idx + 1}</span>
                 <span className="step-label">{s.label}</span>
-                {isActive && <span className="step-indicator" />}
               </button>
             );
           })}
@@ -68,13 +66,13 @@ function App() {
         <div className="sidebar-footer">
           <div className="config-summary">
             {config.tableName && (
-              <div className="config-chip">📋 {config.tableName}</div>
+              <div className="config-chip">{config.tableName}</div>
             )}
             {config.metrics.length > 0 && (
-              <div className="config-chip">📐 {config.metrics.length} metrics</div>
+              <div className="config-chip">{config.metrics.length} metrics</div>
             )}
             {config.widgets.length > 0 && (
-              <div className="config-chip">🧩 {config.widgets.length} widgets</div>
+              <div className="config-chip">{config.widgets.length} widgets</div>
             )}
           </div>
         </div>

@@ -39,7 +39,7 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
   return (
     <div className="panel">
       <div className="panel-header">
-        <h2>🚀 Generate Dashboard</h2>
+        <h2>Generate Dashboard</h2>
         <p className="panel-subtitle">
           Configure output options and generate your ASP.NET Core dashboard project.
         </p>
@@ -91,20 +91,20 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
 
       {generatedPath && (
         <div className="success-banner">
-          <strong>✅ Project generated successfully!</strong>
+          <strong>Project generated successfully.</strong>
           <div>Output: <code>{generatedPath}</code></div>
           {zipPath && <div>Zip: <code>{zipPath}</code></div>}
         </div>
       )}
 
       <div className="btn-row">
-        <button className="btn btn-secondary" onClick={onBack}>Back</button>
+        <button className="btn btn-ghost" onClick={onBack}>Back</button>
         <button
           className="btn btn-primary btn-large"
           onClick={handleGenerate}
           disabled={generating || !config.name}
         >
-          {generating ? '⏳ Generating...' : '🚀 Generate ASP.NET Core Dashboard'}
+          {generating ? 'Generating...' : 'Generate ASP.NET Core Dashboard'}
         </button>
       </div>
     </div>

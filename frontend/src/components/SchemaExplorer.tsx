@@ -46,7 +46,7 @@ export default function SchemaExplorer({ config, onChange, onNext, onBack }: Pro
   return (
     <div className="panel">
       <div className="panel-header">
-        <h2>🗄️ Schema Explorer</h2>
+        <h2>Schema Explorer</h2>
         <p className="panel-subtitle">Select a table and map your key columns.</p>
       </div>
 
@@ -66,7 +66,6 @@ export default function SchemaExplorer({ config, onChange, onNext, onBack }: Pro
                   className={`list-item ${config.tableName === t.name ? 'active' : ''}`}
                   onClick={() => selectTable(t.schema, t.name)}
                 >
-                  <span className="list-item-icon">📋</span>
                   <div>
                     <div className="list-item-name">{t.name}</div>
                     <div className="list-item-sub">{t.schema}</div>
@@ -125,7 +124,7 @@ export default function SchemaExplorer({ config, onChange, onNext, onBack }: Pro
       </div>
 
       <div className="btn-row">
-        <button className="btn btn-secondary" onClick={onBack}>Back</button>
+        <button className="btn btn-ghost" onClick={onBack}>Back</button>
         <button className="btn btn-primary" onClick={onNext} disabled={!canProceed}>
           Next: Define Metrics
         </button>

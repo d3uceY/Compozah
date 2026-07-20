@@ -61,7 +61,7 @@ export default function MetricMapper({ config, onChange, onNext, onBack }: Props
   return (
     <div className="panel">
       <div className="panel-header">
-        <h2>📐 Define Metrics</h2>
+        <h2>Define Metrics</h2>
         <p className="panel-subtitle">
           Map database columns to dashboard metrics. Each metric represents a measurable value.
         </p>
@@ -149,7 +149,7 @@ export default function MetricMapper({ config, onChange, onNext, onBack }: Props
       )}
 
       <div className="btn-row">
-        <button className="btn btn-secondary" onClick={onBack}>Back</button>
+        <button className="btn btn-ghost" onClick={onBack}>Back</button>
         <button
           className="btn btn-primary"
           onClick={onNext}

@@ -59,7 +59,7 @@ export default function WidgetPalette({ config, onChange, onNext, onBack }: Prop
   return (
     <div className="panel">
       <div className="panel-header">
-        <h2>🧩 Dashboard Widgets</h2>
+        <h2>Dashboard Widgets</h2>
         <p className="panel-subtitle">
           Drag widgets from the palette onto your dashboard, or click to add them.
         </p>
@@ -78,7 +78,9 @@ export default function WidgetPalette({ config, onChange, onNext, onBack }: Prop
                 onDragStart={(e) => handleDragStart(e, w)}
                 onClick={() => addWidget(w)}
               >
-                <span className="widget-palette-icon">{w.icon}</span>
+                <div className="widget-type-tag">
+                  <span className="widget-type-tag-letter">{w.icon}</span>
+                </div>
                 <div>
                   <div className="widget-palette-name">{w.name}</div>
                   <div className="widget-palette-desc">{w.description}</div>
@@ -119,7 +121,6 @@ export default function WidgetPalette({ config, onChange, onNext, onBack }: Prop
                     </div>
                     <div className="placed-widget-body">
                       <span className="widget-badge">
-                        {WIDGET_CATALOG.find((c) => c.type === w.type)?.icon}{' '}
                         {WIDGET_CATALOG.find((c) => c.type === w.type)?.name}
                       </span>
                       <div className="form-group" style={{ marginTop: 8 }}>
@@ -156,7 +157,7 @@ export default function WidgetPalette({ config, onChange, onNext, onBack }: Prop
       </div>
 
       <div className="btn-row">
-        <button className="btn btn-secondary" onClick={onBack}>Back</button>
+        <button className="btn btn-ghost" onClick={onBack}>Back</button>
         <button className="btn btn-primary" onClick={onNext} disabled={config.widgets.length === 0}>
           Next: Generate
         </button>

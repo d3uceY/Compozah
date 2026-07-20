@@ -1,0 +1,33 @@
+namespace {{SafeProjectName}}.Models
+{
+    /// <summary>
+    /// Represents a single row of dashboard data returned by a query.
+    /// </summary>
+    public class DashboardDataPoint
+    {
+        public DateTime Timestamp { get; set; }
+        public string? Machine { get; set; }
+{{MetricProperties}}
+    }
+
+    /// <summary>
+    /// A metric definition matching the Compozah configuration.
+    /// </summary>
+    public class MetricDefinition
+    {
+        public string Name { get; set; } = "";
+        public string Column { get; set; } = "";
+        public string Aggregation { get; set; } = "";
+        public string Unit { get; set; } = "";
+    }
+
+    /// <summary>
+    /// Response envelope for dashboard API endpoints.
+    /// </summary>
+    public class DashboardResponse
+    {
+        public List<DashboardDataPoint> Data { get; set; } = new();
+        public List<MetricDefinition> Metrics { get; set; } = new();
+        public DateTime GeneratedAt { get; set; } = DateTime.UtcNow;
+    }
+}

@@ -1,0 +1,112 @@
+using Microsoft.Data.SqlClient;
+
+namespace {{SafeProjectName}}.Services
+{
+    /// <summary>
+    /// Handles all database queries for the dashboard.
+    /// Results are cached for a configurable duration.
+    /// </summary>
+    public class DatabaseService
+    {
+        private readonly string _connectionString;
+        private readonly TimeSpan _cacheDuration;
+        private DateTime _lastFetch = DateTime.MinValue;
+        private List<Models.DashboardDataPoint>? _cachedData;
+
+        public DatabaseService(string connectionString, int refreshSeconds = 60)
+        {
+            _connectionString = connectionString;
+            _cacheDuration = TimeSpan.FromSeconds(refreshSeconds);
+        }
+
+        /// <summary>
+        /// Returns the dashboard data, using cache when valid.
+        /// </summary>
+        public async Task<List<Models.DashboardDataPoint>> GetDataAsync(
+            string tableName, string timestampCol, string? machineCol,
+            List<string> metricColumns, DateTime? since = null)
+        {
+            if (_cachedData != null && DateTime.UtcNow - _lastFetch < _cacheDuration)
+                return _cachedData;
+
+            var results = new List<Models.DashboardDataPoint>();
+            since ??= DateTime.Today.AddDays(-30);
+
+            var cols = new List<string>();
+            if (!string.IsNullOrEmpty(timestampCol))
+                cols.Add($"[{timestampCol}]");
+            if (!string.IsNullOrEmpty(machineCol))
+                cols.Add($"[{machineCol}]");
+            cols.AddRange(metricColumns.Select(c => $"[{c}]"));
+
+            var sql = $@"
+                SELECT {string.Join(", ", cols)}
+                FROM [{tableName}]
+                WHERE [{timestampCol}] >= @Since
+                ORDER BY [{timestampCol}]";
+
+            await using var conn = new SqlConnection(_connectionString);
+            await conn.OpenAsync();
+            await using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@Since", since.Value);
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var pt = new Models.DashboardDataPoint();
+                int idx = 0;
+
+                if (!string.IsNullOrEmpty(timestampCol))
+                    pt.Timestamp = reader.GetDateTime(idx++);
+
+                if (!string.IsNullOrEmpty(machineCol))
+                    pt.Machine = reader.IsDBNull(idx) ? null : reader.GetString(idx);
+                if (!string.IsNullOrEmpty(machineCol)) idx++;
+
+                // Fill metric properties dynamically.
+                var props = typeof(Models.DashboardDataPoint).GetProperties()
+                    .Where(p => p.PropertyType == typeof(double)).ToList();
+                for (int i = 0; i < metricColumns.Count && i < props.Count; i++)
+                {
+                    var val = reader.IsDBNull(idx + i) ? 0.0 : reader.GetDouble(idx + i);
+                    props[i].SetValue(pt, val);
+                }
+
+                results.Add(pt);
+            }
+
+            _cachedData = results;
+            _lastFetch = DateTime.UtcNow;
+            return results;
+        }
+
+        /// <summary>
+        /// Executes a custom aggregation query.
+        /// </summary>
+        public async Task<List<Dictionary<string, object>>> QueryAsync(string sql, Dictionary<string, object>? parameters = null)
+        {
+            var results = new List<Dictionary<string, object>>();
+
+            await using var conn = new SqlConnection(_connectionString);
+            await conn.OpenAsync();
+            await using var cmd = new SqlCommand(sql, conn);
+
+            if (parameters != null)
+            {
+                foreach (var p in parameters)
+                    cmd.Parameters.AddWithValue(p.Key, p.Value ?? DBNull.Value);
+            }
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var row = new Dictionary<string, object>();
+                for (int i = 0; i < reader.FieldCount; i++)
+                    row[reader.GetName(i)] = reader.IsDBNull(i) ? null! : reader.GetValue(i);
+                results.Add(row);
+            }
+
+            return results;
+        }
+    }
+}

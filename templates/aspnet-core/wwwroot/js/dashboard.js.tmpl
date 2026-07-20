@@ -1,0 +1,424 @@
+/**
+ * Compozah Dashboard JavaScript
+ * Renders dashboard widgets from configuration and fetches data from API endpoints.
+ */
+
+(function () {
+    'use strict';
+
+    const config = window.__DASHBOARD_CONFIG__ || { widgets: [], metrics: [], refreshSeconds: 60 };
+    const grid = document.getElementById('dashboard-grid');
+    let refreshInterval = null;
+    let countdown = config.refreshSeconds;
+
+    // --- Initialization ---
+
+    function init() {
+        renderWidgets();
+        fetchAllData();
+        startRefreshTimer();
+    }
+
+    // --- Widget Rendering ---
+
+    function renderWidgets() {
+        if (!grid) return;
+
+        config.widgets.forEach(function (w) {
+            const card = document.createElement('div');
+            card.className = 'widget-card' + (w.width >= 2 ? ' wide' : '');
+            card.id = 'widget-' + w.id;
+            card.innerHTML =
+                '<div class="widget-header">' +
+                '<h3>' + escapeHtml(w.title) + '</h3>' +
+                '</div>' +
+                '<div class="widget-body" id="body-' + w.id + '">' +
+                '<div class="loading">Loading...</div>' +
+                '</div>';
+            grid.appendChild(card);
+        });
+    }
+
+    // --- Data Fetching ---
+
+    async function fetchAllData() {
+        updateLastRefresh();
+
+        for (const w of config.widgets) {
+            try {
+                await fetchWidgetData(w);
+            } catch (e) {
+                console.error('Failed to fetch data for widget ' + w.id, e);
+                showError(w.id, 'Failed to load data');
+            }
+        }
+    }
+
+    async function fetchWidgetData(widget) {
+        let url = '';
+        switch (widget.type) {
+            case 'today_consumption':
+                url = '/api/dashboard/today';
+                break;
+            case 'hourly_trend':
+                url = '/api/dashboard/hourly';
+                break;
+            case 'daily_trend':
+                url = '/api/dashboard/daily?days=7';
+                break;
+            case 'weekly_comparison':
+                url = '/api/dashboard/weekly';
+                break;
+            case 'monthly_trend':
+                url = '/api/dashboard/monthly';
+                break;
+            case 'machine_comparison':
+                url = '/api/dashboard/machines';
+                break;
+            case 'data_table':
+                url = '/api/dashboard/data';
+                break;
+            default:
+                url = '/api/dashboard/data';
+        }
+
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+
+        renderWidgetContent(widget, data);
+    }
+
+    // --- Content Rendering ---
+
+    function renderWidgetContent(widget, data) {
+        const body = document.getElementById('body-' + widget.id);
+        if (!body) return;
+
+        switch (widget.type) {
+            case 'today_consumption':
+                renderKPI(body, data, widget);
+                break;
+            case 'hourly_trend':
+                renderLineChart(body, data, widget, 'Hour', 'Value');
+                break;
+            case 'daily_trend':
+                renderLineChart(body, data, widget, 'Date', 'Value');
+                break;
+            case 'weekly_comparison':
+                renderBarChart(body, data, widget, 'Week', 'Value', 'Machine');
+                break;
+            case 'monthly_trend':
+                renderLineChart(body, data, widget, 'Month', 'Value');
+                break;
+            case 'machine_comparison':
+                renderBarChart(body, data, widget, 'Machine', 'Value');
+                break;
+            case 'pie_chart':
+                renderPieChart(body, data, widget, 'Machine', 'Value');
+                break;
+            case 'gauge':
+                renderGauge(body, data, widget);
+                break;
+            case 'data_table':
+                renderDataTable(body, data, widget);
+                break;
+            case 'kpi':
+                renderKPI(body, data, widget);
+                break;
+            default:
+                renderLineChart(body, data, widget, 'Date', 'Value');
+        }
+    }
+
+    function renderKPI(body, data, widget) {
+        const metric = config.metrics[0] || {};
+        const total = data.total !== undefined ? data.total : 0;
+        const unit = data.unit || metric.unit || '';
+
+        body.innerHTML =
+            '<div class="kpi-number">' +
+            '<span class="kpi-value">' + formatNumber(total) + '</span>' +
+            '<span class="kpi-unit">' + escapeHtml(unit) + '</span>' +
+            '<div class="kpi-label">' + escapeHtml(widget.title) + '</div>' +
+            '</div>';
+    }
+
+    function renderLineChart(body, data, widget, labelKey, valueKey) {
+        const arr = Array.isArray(data) ? data : (data.data || []);
+        const labels = arr.map(function (r) { return String(r[labelKey] || ''); });
+        const values = arr.map(function (r) { return parseFloat(r[valueKey]) || 0; });
+
+        if (labels.length === 0) {
+            body.innerHTML = '<div class="empty-state">No data available</div>';
+            return;
+        }
+
+        body.innerHTML = '<div class="chart-container"><canvas id="chart-' + widget.id + '"></canvas></div>';
+
+        const ctx = document.getElementById('chart-' + widget.id);
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: widget.title,
+                    data: values,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 3,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#94a3b8', maxTicksLimit: 12 },
+                        grid: { color: 'rgba(51, 65, 85, 0.5)' }
+                    },
+                    y: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(51, 65, 85, 0.5)' },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    function renderBarChart(body, data, widget, labelKey, valueKey, stackKey) {
+        const arr = Array.isArray(data) ? data : (data.data || []);
+
+        if (arr.length === 0) {
+            body.innerHTML = '<div class="empty-state">No data available</div>';
+            return;
+        }
+
+        body.innerHTML = '<div class="chart-container"><canvas id="chart-' + widget.id + '"></canvas></div>';
+
+        const ctx = document.getElementById('chart-' + widget.id);
+        if (!ctx) return;
+
+        // Group by stackKey if provided.
+        let datasets = [];
+        if (stackKey && arr[0] && arr[0][stackKey] !== undefined) {
+            const groups = {};
+            arr.forEach(function (r) {
+                const key = String(r[stackKey] || 'Unknown');
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(r);
+            });
+
+            const allLabels = [...new Set(arr.map(function (r) { return String(r[labelKey] || ''); }))];
+
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
+            let colorIdx = 0;
+
+            Object.keys(groups).forEach(function (key) {
+                const groupData = groups[key];
+                const values = allLabels.map(function (lbl) {
+                    const found = groupData.find(function (r) { return String(r[labelKey] || '') === lbl; });
+                    return found ? (parseFloat(found[valueKey]) || 0) : 0;
+                });
+
+                datasets.push({
+                    label: key,
+                    data: values,
+                    backgroundColor: colors[colorIdx % colors.length],
+                    borderRadius: 4
+                });
+                colorIdx++;
+            });
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: { labels: allLabels, datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(51, 65, 85, 0.5)' } },
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(51, 65, 85, 0.5)' }, beginAtZero: true }
+                    }
+                }
+            });
+        } else {
+            const labels = arr.map(function (r) { return String(r[labelKey] || ''); });
+            const values = arr.map(function (r) { return parseFloat(r[valueKey]) || 0; });
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: widget.title,
+                        data: values,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(51, 65, 85, 0.5)' } },
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(51, 65, 85, 0.5)' }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+    }
+
+    function renderPieChart(body, data, widget, labelKey, valueKey) {
+        const arr = Array.isArray(data) ? data : (data.data || []);
+
+        if (arr.length === 0) {
+            body.innerHTML = '<div class="empty-state">No data available</div>';
+            return;
+        }
+
+        body.innerHTML = '<div class="chart-container"><canvas id="chart-' + widget.id + '"></canvas></div>';
+
+        const ctx = document.getElementById('chart-' + widget.id);
+        if (!ctx) return;
+
+        const labels = arr.map(function (r) { return String(r[labelKey] || ''); });
+        const values = arr.map(function (r) { return parseFloat(r[valueKey]) || 0; });
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#94a3b8', padding: 16 }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderGauge(body, data, widget) {
+        const total = data.total !== undefined ? data.total : 0;
+        const maxVal = data.max || total * 1.5 || 100;
+        const pct = Math.min(100, Math.max(0, (total / maxVal) * 100));
+
+        body.innerHTML =
+            '<div class="gauge-container">' +
+            '<div class="gauge-value">' + formatNumber(total) + '</div>' +
+            '<div class="gauge-bar"><div class="gauge-fill" style="width:' + pct + '%"></div></div>' +
+            '<div style="margin-top:8px;font-size:0.75rem;color:var(--color-text-muted)">' +
+            formatNumber(0) + ' &mdash; ' + formatNumber(maxVal) +
+            '</div>' +
+            '</div>';
+    }
+
+    function renderDataTable(body, data, widget) {
+        const arr = Array.isArray(data) ? data : (data.data || []);
+
+        if (arr.length === 0) {
+            body.innerHTML = '<div class="empty-state">No data available</div>';
+            return;
+        }
+
+        const keys = Object.keys(arr[0]);
+
+        let html = '<div style="overflow-x:auto;width:100%"><table class="data-table"><thead><tr>';
+        keys.forEach(function (k) {
+            html += '<th>' + escapeHtml(k) + '</th>';
+        });
+        html += '</tr></thead><tbody>';
+
+        arr.slice(0, 20).forEach(function (row) {
+            html += '<tr>';
+            keys.forEach(function (k) {
+                const val = row[k];
+                const display = typeof val === 'number' ? formatNumber(val) : String(val !== null && val !== undefined ? val : '');
+                html += '<td>' + escapeHtml(display) + '</td>';
+            });
+            html += '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        body.innerHTML = html;
+    }
+
+    // --- Utilities ---
+
+    function formatNumber(n) {
+        if (typeof n !== 'number') return String(n);
+        return n.toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(String(str)));
+        return div.innerHTML;
+    }
+
+    function updateLastRefresh() {
+        const el = document.getElementById('last-refresh');
+        if (el) {
+            el.textContent = 'Last refresh: ' + new Date().toLocaleTimeString();
+        }
+    }
+
+    function showError(widgetId, message) {
+        const body = document.getElementById('body-' + widgetId);
+        if (body) {
+            body.innerHTML = '<div class="error-state">' + escapeHtml(message) + '</div>';
+        }
+    }
+
+    // --- Refresh Timer ---
+
+    function startRefreshTimer() {
+        if (refreshInterval) clearInterval(refreshInterval);
+
+        updateTimerDisplay();
+
+        refreshInterval = setInterval(function () {
+            countdown--;
+            updateTimerDisplay();
+
+            if (countdown <= 0) {
+                countdown = config.refreshSeconds;
+                fetchAllData();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const el = document.getElementById('refresh-timer');
+        if (el) {
+            el.textContent = countdown + 's';
+        }
+    }
+
+    // --- Kick off ---
+
+    document.addEventListener('DOMContentLoaded', init);
+})();

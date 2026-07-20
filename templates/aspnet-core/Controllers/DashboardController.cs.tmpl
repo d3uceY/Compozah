@@ -1,0 +1,219 @@
+using Microsoft.AspNetCore.Mvc;
+using {{SafeProjectName}}.Services;
+
+namespace {{SafeProjectName}}.Controllers
+{
+    /// <summary>
+    /// Serves dashboard data as JSON for the frontend charts.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    public class DashboardController : ControllerBase
+    {
+        private readonly DatabaseService _db;
+        private readonly IConfiguration _config;
+
+        public DashboardController(DatabaseService db, IConfiguration config)
+        {
+            _db = db;
+            _config = config;
+        }
+
+        /// <summary>
+        /// Returns all dashboard data points.
+        /// </summary>
+        [HttpGet("data")]
+        public async Task<IActionResult> GetData([FromQuery] DateTime? since)
+        {
+            var table = _config["Dashboard:TableName"] ?? "";
+            var tsCol = _config["Dashboard:TimestampColumn"] ?? "";
+            var machineCol = _config["Dashboard:MachineColumn"] ?? "";
+
+            var metricDefs = Models.DashboardResponse.GetMetricDefinitions();
+            var cols = metricDefs.Select(m => m.Column).ToList();
+
+            var data = await _db.GetDataAsync(table, tsCol, machineCol, cols, since);
+
+            return Ok(new Models.DashboardResponse
+            {
+                Data = data,
+                Metrics = metricDefs,
+                GeneratedAt = DateTime.UtcNow
+            });
+        }
+
+        /// <summary>
+        /// Returns today's consumption total.
+        /// </summary>
+        [HttpGet("today")]
+        public async Task<IActionResult> GetToday()
+        {
+            var table = _config["Dashboard:TableName"] ?? "";
+            var tsCol = _config["Dashboard:TimestampColumn"] ?? "";
+
+            var metricDefs = Models.DashboardResponse.GetMetricDefinitions();
+            // Use the first metric for today's consumption.
+            var metric = metricDefs.FirstOrDefault();
+
+            var sql = $@"
+                SELECT ISNULL(SUM([{metric?.Column ?? "1"}]), 0) AS Total
+                FROM [{table}]
+                WHERE [{tsCol}] >= CAST(GETDATE() AS DATE)";
+
+            var result = await _db.QueryAsync(sql);
+
+            return Ok(new { total = result.FirstOrDefault()?["Total"] ?? 0, unit = metric?.Unit ?? "" });
+        }
+
+        /// <summary>
+        /// Returns hourly-aggregated data for the trend chart.
+        /// </summary>
+        [HttpGet("hourly")]
+        public async Task<IActionResult> GetHourly()
+        {
+            var table = _config["Dashboard:TableName"] ?? "";
+            var tsCol = _config["Dashboard:TimestampColumn"] ?? "";
+
+            var metricDefs = Models.DashboardResponse.GetMetricDefinitions();
+            var metric = metricDefs.FirstOrDefault();
+
+            var sql = $@"
+                SELECT 
+                    DATEPART(HOUR, [{tsCol}]) AS Hour,
+                    ISNULL(SUM([{metric?.Column ?? "1"}]), 0) AS Value
+                FROM [{table}]
+                WHERE [{tsCol}] >= CAST(GETDATE() AS DATE)
+                GROUP BY DATEPART(HOUR, [{tsCol}])
+                ORDER BY Hour";
+
+            var result = await _db.QueryAsync(sql);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Returns daily-aggregated data for trend charts.
+        /// </summary>
+        [HttpGet("daily")]
+        public async Task<IActionResult> GetDaily([FromQuery] int? days)
+        {
+            var table = _config["Dashboard:TableName"] ?? "";
+            var tsCol = _config["Dashboard:TimestampColumn"] ?? "";
+            var machineCol = _config["Dashboard:MachineColumn"] ?? "";
+            days ??= 7;
+
+            var metricDefs = Models.DashboardResponse.GetMetricDefinitions();
+            var metric = metricDefs.FirstOrDefault();
+
+            var machineClause = string.IsNullOrEmpty(machineCol) ? "" : $", [{machineCol}]";
+
+            var sql = $@"
+                SELECT 
+                    CAST([{tsCol}] AS DATE) AS Date{(!string.IsNullOrEmpty(machineCol) ? $", [{machineCol}] AS Machine" : "")},
+                    ISNULL(SUM([{metric?.Column ?? "1"}]), 0) AS Value
+                FROM [{table}]
+                WHERE [{tsCol}] >= DATEADD(DAY, -{days}, GETDATE())
+                GROUP BY CAST([{tsCol}] AS DATE){(!string.IsNullOrEmpty(machineCol) ? $", [{machineCol}]" : "")}
+                ORDER BY Date";
+
+            var result = await _db.QueryAsync(sql);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Returns weekly comparison data.
+        /// </summary>
+        [HttpGet("weekly")]
+        public async Task<IActionResult> GetWeekly()
+        {
+            var table = _config["Dashboard:TableName"] ?? "";
+            var tsCol = _config["Dashboard:TimestampColumn"] ?? "";
+            var machineCol = _config["Dashboard:MachineColumn"] ?? "";
+
+            var metricDefs = Models.DashboardResponse.GetMetricDefinitions();
+            var metric = metricDefs.FirstOrDefault();
+
+            var machineClause = string.IsNullOrEmpty(machineCol) ? "" : $", [{machineCol}]";
+
+            var sql = $@"
+                SELECT 
+                    DATEPART(WEEK, [{tsCol}]) AS Week,
+                    DATEPART(YEAR, [{tsCol}]) AS Year{(!string.IsNullOrEmpty(machineCol) ? $", [{machineCol}] AS Machine" : "")},
+                    ISNULL(SUM([{metric?.Column ?? "1"}]), 0) AS Value
+                FROM [{table}]
+                WHERE [{tsCol}] >= DATEADD(WEEK, -4, GETDATE())
+                GROUP BY DATEPART(WEEK, [{tsCol}]), DATEPART(YEAR, [{tsCol}]){(!string.IsNullOrEmpty(machineCol) ? $", [{machineCol}]" : "")}
+                ORDER BY Year, Week";
+
+            var result = await _db.QueryAsync(sql);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Returns monthly trend data.
+        /// </summary>
+        [HttpGet("monthly")]
+        public async Task<IActionResult> GetMonthly([FromQuery] int? months)
+        {
+            var table = _config["Dashboard:TableName"] ?? "";
+            var tsCol = _config["Dashboard:TimestampColumn"] ?? "";
+            months ??= 12;
+
+            var metricDefs = Models.DashboardResponse.GetMetricDefinitions();
+            var metric = metricDefs.FirstOrDefault();
+
+            var sql = $@"
+                SELECT 
+                    DATEPART(MONTH, [{tsCol}]) AS Month,
+                    DATEPART(YEAR, [{tsCol}]) AS Year,
+                    ISNULL(SUM([{metric?.Column ?? "1"}]), 0) AS Value
+                FROM [{table}]
+                WHERE [{tsCol}] >= DATEADD(MONTH, -{months}, GETDATE())
+                GROUP BY DATEPART(MONTH, [{tsCol}]), DATEPART(YEAR, [{tsCol}])
+                ORDER BY Year, Month";
+
+            var result = await _db.QueryAsync(sql);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Returns machine comparison data.
+        /// </summary>
+        [HttpGet("machines")]
+        public async Task<IActionResult> GetMachines()
+        {
+            var table = _config["Dashboard:TableName"] ?? "";
+            var tsCol = _config["Dashboard:TimestampColumn"] ?? "";
+            var machineCol = _config["Dashboard:MachineColumn"] ?? "";
+
+            if (string.IsNullOrEmpty(machineCol))
+                return Ok(new List<object>());
+
+            var metricDefs = Models.DashboardResponse.GetMetricDefinitions();
+            var metric = metricDefs.FirstOrDefault();
+
+            var sql = $@"
+                SELECT 
+                    [{machineCol}] AS Machine,
+                    ISNULL(SUM([{metric?.Column ?? "1"}]), 0) AS Value
+                FROM [{table}]
+                WHERE [{tsCol}] >= CAST(GETDATE() AS DATE)
+                GROUP BY [{machineCol}]
+                ORDER BY Value DESC";
+
+            var result = await _db.QueryAsync(sql);
+            return Ok(result);
+        }
+    }
+
+    // Extension method for DashboardResponse to read metric definitions.
+    public static class DashboardResponseExtensions
+    {
+        public static List<Models.MetricDefinition> GetMetricDefinitions()
+        {
+            return new List<Models.MetricDefinition>
+            {
+                {{MetricsJSON}}
+            };
+        }
+    }
+}

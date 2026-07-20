@@ -1,0 +1,25 @@
+using Microsoft.Data.SqlClient;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllersWithViews();
+
+// Register the database service as a singleton with the connection string.
+builder.Services.AddSingleton(new {{SafeProjectName}}.Services.DatabaseService(
+    "{{ConnectionString}}"));
+
+var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+app.UseStaticFiles();
+app.UseRouting();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();

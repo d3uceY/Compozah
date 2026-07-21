@@ -183,9 +183,9 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
           <div>Output: <code>{generatedPath}</code></div>
           {zipPath && <div>Zip: <code>{zipPath}</code></div>}
           <div className="success-actions">
-            <button className="btn btn-primary btn-sm" onClick={() => Browser.OpenURL('file:///' + generatedPath.replace(/\\/g, '/'))}>
+            {/* <button className="btn btn-primary btn-sm" onClick={() => Browser.OpenURL('file:///' + generatedPath.replace(/\\/g, '/'))}>
               Open in Explorer
-            </button>
+            </button> */}
             <button className="btn btn-secondary btn-sm" onClick={() => navigator.clipboard.writeText(generatedPath)}>
               Copy Path
             </button>

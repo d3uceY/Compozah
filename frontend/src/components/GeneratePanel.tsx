@@ -95,7 +95,7 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
         <div className="preview-grid">
           <div className="preview-item">
             <span className="preview-label">Project Name</span>
-            <span className="preview-value">{config.name || '—'}</span>
+            <span className="preview-value">{config.name || '-'}</span>
           </div>
           <div className="preview-item">
             <span className="preview-label">Database</span>
@@ -103,7 +103,7 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
           </div>
           <div className="preview-item">
             <span className="preview-label">Table</span>
-            <span className="preview-value">{config.tableName || '—'}</span>
+            <span className="preview-value">{config.tableName || '-'}</span>
           </div>
           <div className="preview-item">
             <span className="preview-label">Output Path</span>
@@ -115,11 +115,11 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
           </div>
           <div className="preview-item">
             <span className="preview-label">Metrics</span>
-            <span className="preview-value">{config.metrics.length > 0 ? `${config.metrics.length} defined` : '—'}</span>
+            <span className="preview-value">{config.metrics.length > 0 ? `${config.metrics.length} defined` : '-'}</span>
           </div>
           <div className="preview-item">
             <span className="preview-label">Widgets</span>
-            <span className="preview-value">{config.widgets.length > 0 ? `${config.widgets.length} placed` : '—'}</span>
+            <span className="preview-value">{config.widgets.length > 0 ? `${config.widgets.length} placed` : '-'}</span>
           </div>
           <div className="preview-item">
             <span className="preview-label">Authentication</span>
@@ -132,7 +132,7 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
             <ul>
               {config.metrics.map((m) => (
                 <li key={m.name}>
-                  <strong>{m.name}</strong> — {m.aggregation}({m.column}){m.unit ? ` ${m.unit}` : ''}
+                  <strong>{m.name}</strong> - {m.aggregation}({m.column}){m.unit ? ` ${m.unit}` : ''}
                 </li>
               ))}
             </ul>
@@ -144,7 +144,7 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
             <ul>
               {config.widgets.map((w) => (
                 <li key={w.id}>
-                  <strong>{w.title}</strong> — {w.type.replace(/_/g, ' ')}
+                  <strong>{w.title}</strong> - {w.type.replace(/_/g, ' ')}
                 </li>
               ))}
             </ul>

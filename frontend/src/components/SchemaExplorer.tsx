@@ -118,7 +118,7 @@ export default function SchemaExplorer({ config, onChange, onNext, onBack }: Pro
               </div>
             </div>
           ) : (
-            <div className="empty-hint">← Select a table to map its columns</div>
+            <div className="empty-hint">Select a table to map its columns</div>
           )}
         </div>
       </div>

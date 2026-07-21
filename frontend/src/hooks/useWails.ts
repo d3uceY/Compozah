@@ -15,29 +15,29 @@ import type {
 // Extend the Window interface to include Wails runtime.
 declare global {
   interface Window {
-    go: {
-      service: {
-        DatabaseService: {
+    go?: {
+      service?: {
+        DatabaseService?: {
           Connect(config: ConnectionConfig): Promise<void>;
           Disconnect(): Promise<void>;
           IsConnected(): Promise<boolean>;
           GetTables(): Promise<TableInfo[]>;
           GetColumns(schema: string, table: string): Promise<ColumnInfo[]>;
         };
-        ConfigService: {
+        ConfigService?: {
           SaveDashboard(cfg: DashboardConfig): Promise<void>;
           LoadDashboard(name: string): Promise<DashboardConfig>;
           ListDashboards(): Promise<string[]>;
           DeleteDashboard(name: string): Promise<void>;
         };
-        GeneratorService: {
+        GeneratorService?: {
           Generate(cfg: DashboardConfig): Promise<string>;
         };
-        ProjectExporter: {
+        ProjectExporter?: {
           ExportToZip(projectDir: string): Promise<string>;
           GetProjectSize(projectDir: string): Promise<number>;
         };
-        AppInfoService: {
+        AppInfoService?: {
           GetVersion(): Promise<string>;
         };
       };
@@ -45,65 +45,82 @@ declare global {
   }
 }
 
+function wailsReady(): boolean {
+  return !!window.go?.service;
+}
+
 // --- Database Service ---
 
 export async function connectToDatabase(config: ConnectionConfig): Promise<void> {
-  await window.go.service.DatabaseService.Connect(config);
+  if (!wailsReady()) throw new Error('Wails runtime not available');
+  await window.go!.service!.DatabaseService!.Connect(config);
 }
 
 export async function disconnectDatabase(): Promise<void> {
-  await window.go.service.DatabaseService.Disconnect();
+  if (!wailsReady()) return;
+  await window.go!.service!.DatabaseService!.Disconnect();
 }
 
 export async function isConnected(): Promise<boolean> {
-  return window.go.service.DatabaseService.IsConnected();
+  if (!wailsReady()) return false;
+  return window.go!.service!.DatabaseService!.IsConnected();
 }
 
 export async function getTables(): Promise<TableInfo[]> {
-  return window.go.service.DatabaseService.GetTables();
+  if (!wailsReady()) return [];
+  return window.go!.service!.DatabaseService!.GetTables();
 }
 
 export async function getColumns(schema: string, table: string): Promise<ColumnInfo[]> {
-  return window.go.service.DatabaseService.GetColumns(schema, table);
+  if (!wailsReady()) return [];
+  return window.go!.service!.DatabaseService!.GetColumns(schema, table);
 }
 
 // --- Config Service ---
 
 export async function saveDashboard(cfg: DashboardConfig): Promise<void> {
-  await window.go.service.ConfigService.SaveDashboard(cfg);
+  if (!wailsReady()) throw new Error('Wails runtime not available');
+  await window.go!.service!.ConfigService!.SaveDashboard(cfg);
 }
 
 export async function loadDashboard(name: string): Promise<DashboardConfig> {
-  return window.go.service.ConfigService.LoadDashboard(name);
+  if (!wailsReady()) throw new Error('Wails runtime not available');
+  return window.go!.service!.ConfigService!.LoadDashboard(name);
 }
 
 export async function listDashboards(): Promise<string[]> {
-  return window.go.service.ConfigService.ListDashboards();
+  if (!wailsReady()) return [];
+  return window.go!.service!.ConfigService!.ListDashboards();
 }
 
 export async function deleteDashboard(name: string): Promise<void> {
-  await window.go.service.ConfigService.DeleteDashboard(name);
+  if (!wailsReady()) return;
+  await window.go!.service!.ConfigService!.DeleteDashboard(name);
 }
 
 // --- Generator Service ---
 
 export async function generateProject(cfg: DashboardConfig): Promise<string> {
-  return window.go.service.GeneratorService.Generate(cfg);
+  if (!wailsReady()) throw new Error('Wails runtime not available');
+  return window.go!.service!.GeneratorService!.Generate(cfg);
 }
 
 // --- Exporter Service ---
 
 export async function exportToZip(projectDir: string): Promise<string> {
-  return window.go.service.ProjectExporter.ExportToZip(projectDir);
+  if (!wailsReady()) throw new Error('Wails runtime not available');
+  return window.go!.service!.ProjectExporter!.ExportToZip(projectDir);
 }
 
 export async function getProjectSize(projectDir: string): Promise<number> {
-  return window.go.service.ProjectExporter.GetProjectSize(projectDir);
+  if (!wailsReady()) return 0;
+  return window.go!.service!.ProjectExporter!.GetProjectSize(projectDir);
 }
 
 // --- App Info Service ---
 
 export async function getAppVersion(): Promise<string> {
+  if (!window.go?.service?.AppInfoService) return '';
   return window.go.service.AppInfoService.GetVersion();
 }
 

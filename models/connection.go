@@ -12,13 +12,22 @@ type ConnectionConfig struct {
 }
 
 // ConnectionString builds a SQL Server connection string from the config.
+// When Username is empty, Windows Authentication (Integrated Security) is used.
 func (c ConnectionConfig) ConnectionString() string {
-    return fmt.Sprintf(
-        "server=%s;port=%d;user id=%s;password=%s;database=%s;encrypt=disable",
-        c.Server,
-        c.Port,
-        c.Username,
-        c.Password,
-        c.Database,
-    )
+	if c.Username == "" {
+		return fmt.Sprintf(
+			"server=%s;port=%d;database=%s;integrated security=true;encrypt=true;trustservercertificate=true",
+			c.Server,
+			c.Port,
+			c.Database,
+		)
+	}
+	return fmt.Sprintf(
+		"server=%s;port=%d;user id=%s;password=%s;database=%s;encrypt=true;trustservercertificate=true",
+		c.Server,
+		c.Port,
+		c.Username,
+		c.Password,
+		c.Database,
+	)
 }

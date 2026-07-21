@@ -106,6 +106,9 @@ func (e *TemplateEngine) fillPlaceholders(text string, data TemplateData) string
 	// Build metrics JSON for frontend.
 	text = strings.ReplaceAll(text, "{{MetricsJSON}}", buildMetricsJSON(data.Metrics))
 
+	// Build C# metric object initializers.
+	text = strings.ReplaceAll(text, "{{MetricsCSharp}}", buildMetricsCSharp(data.Metrics))
+
 	// Build widgets JSON for frontend.
 	text = strings.ReplaceAll(text, "{{WidgetsJSON}}", buildWidgetsJSON(data.Widgets))
 
@@ -195,6 +198,18 @@ func buildWidgetsJSON(widgets []WidgetTemplateData) string {
 				`","chartType":"`+w.ChartType+`","width":`+itoa(w.Width)+`}`)
 	}
 	return "[" + strings.Join(parts, ",") + "]"
+}
+
+func buildMetricsCSharp(metrics []MetricTemplateData) string {
+	if len(metrics) == 0 {
+		return ""
+	}
+	parts := make([]string, 0, len(metrics))
+	for _, m := range metrics {
+		parts = append(parts,
+			`new Models.MetricDefinition { Name = "`+m.Name+`", Column = "`+m.Column+`", Aggregation = "`+m.Aggregation+`", Unit = "`+m.Unit+`" }`)
+	}
+	return strings.Join(parts, ",\n\t\t\t\t")
 }
 
 func buildMetricProperties(metrics []MetricTemplateData) string {

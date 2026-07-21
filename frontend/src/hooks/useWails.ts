@@ -1,127 +1,78 @@
 // ============================================================
 // Compozah Wails Service Bindings
 // ============================================================
-// These functions call the Go backend services exposed via Wails.
-// In Wails v3, services are accessible via `window.go.service.<ServiceName>.<Method>()`
+// Wails v3 generates typed bindings in frontend/bindings/.
+// Import directly from those — do NOT use window.go (that is Wails v2).
 
-import type {
-  ConnectionConfig,
-  TableInfo,
-  ColumnInfo,
-  DashboardConfig,
-  WidgetInfo,
-} from '../types';
+import type { WidgetInfo, ConnectionConfig, DashboardConfig, TableInfo, ColumnInfo } from '../types';
 
-// Extend the Window interface to include Wails runtime.
-declare global {
-  interface Window {
-    go?: {
-      service?: {
-        DatabaseService?: {
-          Connect(config: ConnectionConfig): Promise<void>;
-          Disconnect(): Promise<void>;
-          IsConnected(): Promise<boolean>;
-          GetTables(): Promise<TableInfo[]>;
-          GetColumns(schema: string, table: string): Promise<ColumnInfo[]>;
-        };
-        ConfigService?: {
-          SaveDashboard(cfg: DashboardConfig): Promise<void>;
-          LoadDashboard(name: string): Promise<DashboardConfig>;
-          ListDashboards(): Promise<string[]>;
-          DeleteDashboard(name: string): Promise<void>;
-        };
-        GeneratorService?: {
-          Generate(cfg: DashboardConfig): Promise<string>;
-        };
-        ProjectExporter?: {
-          ExportToZip(projectDir: string): Promise<string>;
-          GetProjectSize(projectDir: string): Promise<number>;
-        };
-        AppInfoService?: {
-          GetVersion(): Promise<string>;
-        };
-      };
-    };
-  }
-}
+import * as DatabaseService from '../../bindings/compozah/services/databaseservice';
+import * as ConfigService from '../../bindings/compozah/services/configservice';
+import * as GeneratorService from '../../bindings/compozah/services/generatorservice';
+import * as ProjectExporter from '../../bindings/compozah/services/projectexporter';
+import * as AppInfoService from '../../bindings/compozah/services/appinfoservice';
 
-function wailsReady(): boolean {
-  return !!window.go?.service;
-}
 
 // --- Database Service ---
 
 export async function connectToDatabase(config: ConnectionConfig): Promise<void> {
-  if (!wailsReady()) throw new Error('Wails runtime not available');
-  await window.go!.service!.DatabaseService!.Connect(config);
+  await DatabaseService.Connect(config as any);
 }
 
 export async function disconnectDatabase(): Promise<void> {
-  if (!wailsReady()) return;
-  await window.go!.service!.DatabaseService!.Disconnect();
+  await DatabaseService.Disconnect();
 }
 
 export async function isConnected(): Promise<boolean> {
-  if (!wailsReady()) return false;
-  return window.go!.service!.DatabaseService!.IsConnected();
+  return DatabaseService.IsConnected();
 }
 
 export async function getTables(): Promise<TableInfo[]> {
-  if (!wailsReady()) return [];
-  return window.go!.service!.DatabaseService!.GetTables();
+  return DatabaseService.GetTables() as any;
 }
 
 export async function getColumns(schema: string, table: string): Promise<ColumnInfo[]> {
-  if (!wailsReady()) return [];
-  return window.go!.service!.DatabaseService!.GetColumns(schema, table);
+  return DatabaseService.GetColumns(schema, table) as any;
 }
 
 // --- Config Service ---
 
 export async function saveDashboard(cfg: DashboardConfig): Promise<void> {
-  if (!wailsReady()) throw new Error('Wails runtime not available');
-  await window.go!.service!.ConfigService!.SaveDashboard(cfg);
+  await ConfigService.SaveDashboard(cfg as any);
 }
 
 export async function loadDashboard(name: string): Promise<DashboardConfig> {
-  if (!wailsReady()) throw new Error('Wails runtime not available');
-  return window.go!.service!.ConfigService!.LoadDashboard(name);
+  return ConfigService.LoadDashboard(name) as any;
 }
 
 export async function listDashboards(): Promise<string[]> {
-  if (!wailsReady()) return [];
-  return window.go!.service!.ConfigService!.ListDashboards();
+  return ConfigService.ListDashboards();
 }
 
 export async function deleteDashboard(name: string): Promise<void> {
-  if (!wailsReady()) return;
-  await window.go!.service!.ConfigService!.DeleteDashboard(name);
+  await ConfigService.DeleteDashboard(name);
 }
 
 // --- Generator Service ---
 
 export async function generateProject(cfg: DashboardConfig): Promise<string> {
-  if (!wailsReady()) throw new Error('Wails runtime not available');
-  return window.go!.service!.GeneratorService!.Generate(cfg);
+  return GeneratorService.Generate(cfg as any);
 }
 
 // --- Exporter Service ---
 
 export async function exportToZip(projectDir: string): Promise<string> {
-  if (!wailsReady()) throw new Error('Wails runtime not available');
-  return window.go!.service!.ProjectExporter!.ExportToZip(projectDir);
+  return ProjectExporter.ExportToZip(projectDir);
 }
 
 export async function getProjectSize(projectDir: string): Promise<number> {
-  if (!wailsReady()) return 0;
-  return window.go!.service!.ProjectExporter!.GetProjectSize(projectDir);
+  return ProjectExporter.GetProjectSize(projectDir);
 }
 
 // --- App Info Service ---
 
 export async function getAppVersion(): Promise<string> {
-  if (!window.go?.service?.AppInfoService) return '';
-  return window.go.service.AppInfoService.GetVersion();
+  return AppInfoService.GetVersion();
 }
 
 // --- Widget Catalog (client-side) ---

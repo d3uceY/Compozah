@@ -134,6 +134,7 @@ function App() {
           <DashboardPreview
             config={config}
             onBack={() => goTo('widgets')}
+            onNext={() => goTo('generate')}
           />
         )}
         {step === 'generate' && (

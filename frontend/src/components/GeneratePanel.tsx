@@ -147,8 +147,8 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
             <span className="preview-value">{config.widgets.length > 0 ? `${config.widgets.length} placed` : '-'}</span>
           </div>
           <div className="preview-item">
-            <span className="preview-label">Authentication</span>
-            <span className="preview-value">{config.connection.username ? 'SQL Auth' : 'Windows Auth'}</span>
+            <span className="preview-label">Authentication </span>
+            <span className="preview-value">{config.connection.username ? ' SQL Auth' : ' Windows Auth'}</span>
           </div>
         </div>
         {config.metrics.length > 0 && (

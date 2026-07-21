@@ -10,6 +10,11 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
+// Version is the application version. Set at build time via:
+//
+//	-ldflags "-X main.Version=x.y.z"
+var Version = "0.1.0"
+
 //go:embed all:frontend/dist
 var assets embed.FS
 
@@ -35,6 +40,7 @@ func main() {
 			application.NewService(configSvc),
 			application.NewService(generatorSvc),
 			application.NewService(&services.ProjectExporter{}),
+			application.NewService(services.NewAppInfoService(Version)),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),

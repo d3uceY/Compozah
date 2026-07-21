@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { AppStep, DashboardConfig } from './types';
 import ConnectionPanel from './components/ConnectionPanel';
 import SchemaExplorer from './components/SchemaExplorer';
 import MetricMapper from './components/MetricMapper';
 import WidgetPalette from './components/WidgetPalette';
 import GeneratePanel from './components/GeneratePanel';
+import { getAppVersion } from './hooks/useWails';
 import './App.css';
 
 const STEPS: { key: AppStep; label: string }[] = [
@@ -31,6 +32,11 @@ const DEFAULT_CONFIG: DashboardConfig = {
 function App() {
   const [step, setStep] = useState<AppStep>('connect');
   const [config, setConfig] = useState<DashboardConfig>(DEFAULT_CONFIG);
+  const [version, setVersion] = useState('');
+
+  useEffect(() => {
+    getAppVersion().then(setVersion).catch(() => {});
+  }, []);
 
   const currentIdx = STEPS.findIndex((s) => s.key === step);
 
@@ -76,6 +82,7 @@ function App() {
               <div className="config-chip">{config.widgets.length} widgets</div>
             )}
           </div>
+          {version && <div className="app-version">v{version}</div>}
         </div>
       </aside>
 

@@ -37,6 +37,9 @@ declare global {
           ExportToZip(projectDir: string): Promise<string>;
           GetProjectSize(projectDir: string): Promise<number>;
         };
+        AppInfoService: {
+          GetVersion(): Promise<string>;
+        };
       };
     };
   }
@@ -96,6 +99,12 @@ export async function exportToZip(projectDir: string): Promise<string> {
 
 export async function getProjectSize(projectDir: string): Promise<number> {
   return window.go.service.ProjectExporter.GetProjectSize(projectDir);
+}
+
+// --- App Info Service ---
+
+export async function getAppVersion(): Promise<string> {
+  return window.go.service.AppInfoService.GetVersion();
 }
 
 // --- Widget Catalog (client-side) ---

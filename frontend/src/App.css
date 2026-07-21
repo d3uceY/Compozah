@@ -150,6 +150,14 @@
   white-space: nowrap;
 }
 
+.app-version {
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.18);
+  margin-top: 12px;
+  letter-spacing: 0.02em;
+}
+
 /* --- Main Content --- */
 
 .main-content {

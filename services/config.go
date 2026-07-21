@@ -79,3 +79,18 @@ func (c *ConfigService) DeleteDashboard(name string) error {
 	path := filepath.Join(c.storageDir, name+".json")
 	return os.Remove(path)
 }
+
+// AutoSave persists the current working config to an autosave file.
+func (c *ConfigService) AutoSave(cfg models.DashboardConfig) error {
+	return c.save("_autosave.json", cfg)
+}
+
+// LoadAutoSave loads the last autosaved config. Returns the config and true
+// if an autosave file exists, or zero-value and false otherwise.
+func (c *ConfigService) LoadAutoSave() (models.DashboardConfig, bool) {
+	var cfg models.DashboardConfig
+	if err := c.load("_autosave.json", &cfg); err != nil {
+		return models.DashboardConfig{}, false
+	}
+	return cfg, true
+}

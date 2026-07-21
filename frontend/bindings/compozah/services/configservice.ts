@@ -15,6 +15,13 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
 import * as models$0 from "../models/models.js";
 
 /**
+ * AutoSave persists the current working config to an autosave file.
+ */
+export function AutoSave(cfg: models$0.DashboardConfig): $CancellablePromise<void> {
+    return $Call.ByID(1298369584, cfg);
+}
+
+/**
  * DeleteDashboard removes a saved dashboard config.
  */
 export function DeleteDashboard(name: string): $CancellablePromise<void> {
@@ -27,6 +34,17 @@ export function DeleteDashboard(name: string): $CancellablePromise<void> {
 export function ListDashboards(): $CancellablePromise<string[]> {
     return $Call.ByID(2548475543).then(($result: any) => {
         return $$createType0($result);
+    });
+}
+
+/**
+ * LoadAutoSave loads the last autosaved config. Returns the config and true
+ * if an autosave file exists, or zero-value and false otherwise.
+ */
+export function LoadAutoSave(): $CancellablePromise<[models$0.DashboardConfig, boolean]> {
+    return $Call.ByID(2979571864).then(($result: any) => {
+        $result[0] = $$createType1($result[0]);
+        return $result;
     });
 }
 

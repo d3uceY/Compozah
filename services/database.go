@@ -11,7 +11,8 @@ import (
 
 // DatabaseService handles SQL Server connections and schema discovery.
 type DatabaseService struct {
-	db *sql.DB
+	db               *sql.DB
+	currentDatabase  string
 }
 
 // Connect opens a connection to SQL Server using the provided config.
@@ -32,6 +33,14 @@ func (d *DatabaseService) Connect(config models.ConnectionConfig) error {
 		return fmt.Errorf("failed to ping server: %w", err)
 	}
 
+	// Track which database we connected to (or default).
+	d.currentDatabase = config.Database
+	if d.currentDatabase == "" {
+		// Query the current database name from the server.
+		row := d.db.QueryRow("SELECT DB_NAME()")
+		row.Scan(&d.currentDatabase)
+	}
+
 	return nil
 }
 
@@ -49,6 +58,48 @@ func (d *DatabaseService) IsConnected() bool {
 		return false
 	}
 	return d.db.Ping() == nil
+}
+
+// GetDatabases returns all non-system databases on the server.
+func (d *DatabaseService) GetDatabases() ([]string, error) {
+	if d.db == nil {
+		return nil, fmt.Errorf("not connected to database")
+	}
+
+	query := `SELECT name FROM sys.databases WHERE name NOT IN ('master','tempdb','model','msdb') ORDER BY name`
+	rows, err := d.db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query databases: %w", err)
+	}
+	defer rows.Close()
+
+	var dbs []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		dbs = append(dbs, name)
+	}
+	return dbs, rows.Err()
+}
+
+// SwitchDatabase changes the active database context for subsequent queries.
+func (d *DatabaseService) SwitchDatabase(database string) error {
+	if d.db == nil {
+		return fmt.Errorf("not connected to database")
+	}
+	_, err := d.db.Exec("USE [" + database + "]")
+	if err != nil {
+		return fmt.Errorf("failed to switch to %s: %w", database, err)
+	}
+	d.currentDatabase = database
+	return nil
+}
+
+// GetCurrentDatabase returns the currently active database name.
+func (d *DatabaseService) GetCurrentDatabase() string {
+	return d.currentDatabase
 }
 
 // GetTables retrieves all user tables from the connected database.

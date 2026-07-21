@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"log"
+	"os"
 	"path/filepath"
 
 	"compozah/services"
@@ -25,9 +26,17 @@ func main() {
 	// Initialize the template engine with embedded ASP.NET Core templates.
 	templateEngine := services.NewTemplateEngine(aspNetTemplates, "templates/aspnet-core")
 
-	// Initialize config service storing dashboard configs in a local directory.
-	configDir, _ := filepath.Abs("./dashboard-configs")
-	configSvc := services.NewConfigService(configDir)
+	// Store all app data under the OS user config directory.
+	userConfigDir, err := os.UserConfigDir()
+	if err != nil {
+		log.Fatalf("failed to get user config directory: %v", err)
+	}
+	baseDir := filepath.Join(userConfigDir, "Compozah")
+
+	// Config storage: ~/.config/compozah/dashboards/ (Linux)
+	//                ~/Library/Application Support/Compozah/dashboards/ (macOS)
+	//                %AppData%/Compozah/dashboards/ (Windows)
+	configSvc := services.NewConfigService(filepath.Join(baseDir, "dashboards"))
 
 	// Initialize the generator service.
 	generatorSvc := services.NewGeneratorService(templateEngine)

@@ -80,7 +80,7 @@ export interface DashboardConfig {
 }
 
 // UI state types
-export type AppStep = 'connect' | 'schema' | 'metrics' | 'widgets' | 'generate';
+export type AppStep = 'connect' | 'data' | 'widgets' | 'preview' | 'generate';
 
 export interface UIState {
   step: AppStep;

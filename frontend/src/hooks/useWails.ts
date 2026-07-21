@@ -35,6 +35,18 @@ export async function getColumns(schema: string, table: string): Promise<ColumnI
   return DatabaseService.GetColumns(schema, table) as any;
 }
 
+export async function getDatabases(): Promise<string[]> {
+  return DatabaseService.GetDatabases() as any;
+}
+
+export async function switchDatabase(name: string): Promise<void> {
+  await DatabaseService.SwitchDatabase(name);
+}
+
+export async function getCurrentDatabase(): Promise<string> {
+  return DatabaseService.GetCurrentDatabase();
+}
+
 // --- Config Service ---
 
 export async function saveDashboard(cfg: DashboardConfig): Promise<void> {
@@ -51,6 +63,19 @@ export async function listDashboards(): Promise<string[]> {
 
 export async function deleteDashboard(name: string): Promise<void> {
   await ConfigService.DeleteDashboard(name);
+}
+
+export async function autoSave(cfg: DashboardConfig): Promise<void> {
+  await ConfigService.AutoSave(cfg as any);
+}
+
+export async function loadAutoSave(): Promise<DashboardConfig | null> {
+  try {
+    const result = await (ConfigService as any).LoadAutoSave();
+    return result && Object.keys(result).length > 0 ? result : null;
+  } catch {
+    return null;
+  }
 }
 
 // --- Generator Service ---

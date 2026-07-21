@@ -38,13 +38,29 @@ export function GetColumns(schema: string, table: string): $CancellablePromise<m
 }
 
 /**
+ * GetCurrentDatabase returns the currently active database name.
+ */
+export function GetCurrentDatabase(): $CancellablePromise<string> {
+    return $Call.ByID(497502017);
+}
+
+/**
+ * GetDatabases returns all non-system databases on the server.
+ */
+export function GetDatabases(): $CancellablePromise<string[]> {
+    return $Call.ByID(528811647).then(($result: any) => {
+        return $$createType2($result);
+    });
+}
+
+/**
  * GetTables retrieves all user tables from the connected database.
  * Excludes system schemas (sys, INFORMATION_SCHEMA, cdc) and MS replication
  * tables that live in user databases but are managed by SQL Server.
  */
 export function GetTables(): $CancellablePromise<models$0.TableInfo[]> {
     return $Call.ByID(1512099106).then(($result: any) => {
-        return $$createType3($result);
+        return $$createType4($result);
     });
 }
 
@@ -55,8 +71,16 @@ export function IsConnected(): $CancellablePromise<boolean> {
     return $Call.ByID(1961382396);
 }
 
+/**
+ * SwitchDatabase changes the active database context for subsequent queries.
+ */
+export function SwitchDatabase(database: string): $CancellablePromise<void> {
+    return $Call.ByID(2653710768, database);
+}
+
 // Private type creation functions
 const $$createType0 = models$0.ColumnInfo.createFrom;
 const $$createType1 = $Create.Array($$createType0);
-const $$createType2 = models$0.TableInfo.createFrom;
-const $$createType3 = $Create.Array($$createType2);
+const $$createType2 = $Create.Array($Create.Any);
+const $$createType3 = models$0.TableInfo.createFrom;
+const $$createType4 = $Create.Array($$createType3);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { DashboardConfig } from '../types';
 import { generateProject, exportToZip, saveDashboard } from '../hooks/useWails';
-import { Dialogs } from '@wailsio/runtime';
+import { Dialogs, Browser } from '@wailsio/runtime';
 
 interface Props {
   config: DashboardConfig;
@@ -117,7 +117,7 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
       {/* Preview */}
       <div className="preview-section">
         <h3>Project Preview</h3>
-        <div className="preview-grid">
+        <div className="preview-info-grid">
           <div className="preview-item">
             <span className="preview-label">Project Name</span>
             <span className="preview-value">{config.name || '-'}</span>
@@ -182,6 +182,14 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
           <strong>Project generated successfully.</strong>
           <div>Output: <code>{generatedPath}</code></div>
           {zipPath && <div>Zip: <code>{zipPath}</code></div>}
+          <div className="success-actions">
+            <button className="btn btn-primary btn-sm" onClick={() => Browser.OpenURL('file:///' + generatedPath.replace(/\\/g, '/'))}>
+              Open in Explorer
+            </button>
+            <button className="btn btn-secondary btn-sm" onClick={() => navigator.clipboard.writeText(generatedPath)}>
+              Copy Path
+            </button>
+          </div>
         </div>
       )}
 

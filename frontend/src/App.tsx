@@ -1,19 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { AppStep, DashboardConfig } from './types';
 import ConnectionPanel from './components/ConnectionPanel';
-import SchemaExplorer from './components/SchemaExplorer';
-import MetricMapper from './components/MetricMapper';
+import DataConfig from './components/DataConfig';
 import WidgetPalette from './components/WidgetPalette';
+import DashboardPreview from './components/DashboardPreview';
 import GeneratePanel from './components/GeneratePanel';
-import { getAppVersion } from './hooks/useWails';
+import { getAppVersion, autoSave, loadAutoSave } from './hooks/useWails';
 import './App.css';
 
 const STEPS: { key: AppStep; label: string }[] = [
   { key: 'connect', label: 'Connect' },
-  { key: 'schema', label: 'Schema' },
-  { key: 'metrics', label: 'Metrics' },
+  { key: 'data', label: 'Data' },
   { key: 'widgets', label: 'Widgets' },
-  { key: 'generate', label: 'Generate' },
+  { key: 'preview', label: 'Preview' },
+  { key: 'generate', label: 'Export' },
 ];
 
 const DEFAULT_CONFIG: DashboardConfig = {
@@ -33,18 +33,44 @@ function App() {
   const [step, setStep] = useState<AppStep>('connect');
   const [config, setConfig] = useState<DashboardConfig>(DEFAULT_CONFIG);
   const [version, setVersion] = useState('');
+  const configRef = useRef(config);
+  configRef.current = config;
 
+  // Load autosave on startup.
   useEffect(() => {
+    loadAutoSave().then((saved) => {
+      if (saved && saved.connection) {
+        setConfig(saved);
+        // Jump to the last meaningful step.
+        if (saved.widgets.length > 0) setStep('preview');
+        else if (saved.metrics.length > 0) setStep('widgets');
+        else if (saved.tableName) setStep('data');
+      }
+    }).catch(() => {});
     getAppVersion().then(setVersion).catch(() => {});
   }, []);
 
-  const currentIdx = STEPS.findIndex((s) => s.key === step);
+  // Auto-save on config change (debounced 2s).
+  const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const debouncedSave = useCallback(() => {
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      autoSave(configRef.current).catch(() => {});
+    }, 2000);
+  }, []);
 
+  useEffect(() => {
+    if (config.tableName || config.metrics.length > 0 || config.widgets.length > 0) {
+      debouncedSave();
+    }
+    return () => clearTimeout(saveTimer.current);
+  }, [config, debouncedSave]);
+
+  const currentIdx = STEPS.findIndex((s) => s.key === step);
   const goTo = (s: AppStep) => setStep(s);
 
   return (
     <div className="app-container">
-      {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-brand">
           <img src="/logo.png" className="brand-logo" alt="" />
@@ -72,58 +98,49 @@ function App() {
 
         <div className="sidebar-footer">
           <div className="config-summary">
-            {config.tableName && (
-              <div className="config-chip">{config.tableName}</div>
-            )}
-            {config.metrics.length > 0 && (
-              <div className="config-chip">{config.metrics.length} metrics</div>
-            )}
-            {config.widgets.length > 0 && (
-              <div className="config-chip">{config.widgets.length} widgets</div>
-            )}
+            {config.tableName && <div className="config-chip">{config.tableName}</div>}
+            {config.metrics.length > 0 && <div className="config-chip">{config.metrics.length} metrics</div>}
+            {config.widgets.length > 0 && <div className="config-chip">{config.widgets.length} widgets</div>}
           </div>
           {version && <div className="app-version">v{version}</div>}
         </div>
       </aside>
 
-      {/* Main content */}
       <main className="main-content">
         {step === 'connect' && (
           <ConnectionPanel
             config={config.connection}
             onChange={(conn) => setConfig({ ...config, connection: conn })}
-            onConnected={() => goTo('schema')}
+            onConnected={() => goTo('data')}
           />
         )}
-        {step === 'schema' && (
-          <SchemaExplorer
-            config={config}
-            onChange={setConfig}
-            onNext={() => goTo('metrics')}
-            onBack={() => goTo('connect')}
-          />
-        )}
-        {step === 'metrics' && (
-          <MetricMapper
+        {step === 'data' && (
+          <DataConfig
             config={config}
             onChange={setConfig}
             onNext={() => goTo('widgets')}
-            onBack={() => goTo('schema')}
+            onBack={() => goTo('connect')}
           />
         )}
         {step === 'widgets' && (
           <WidgetPalette
             config={config}
             onChange={setConfig}
-            onNext={() => goTo('generate')}
-            onBack={() => goTo('metrics')}
+            onNext={() => goTo('preview')}
+            onBack={() => goTo('data')}
+          />
+        )}
+        {step === 'preview' && (
+          <DashboardPreview
+            config={config}
+            onBack={() => goTo('widgets')}
           />
         )}
         {step === 'generate' && (
           <GeneratePanel
             config={config}
             onChange={setConfig}
-            onBack={() => goTo('widgets')}
+            onBack={() => goTo('preview')}
           />
         )}
       </main>
@@ -132,3 +149,4 @@ function App() {
 }
 
 export default App;
+

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { DashboardConfig } from '../types';
 import { generateProject, exportToZip, saveDashboard } from '../hooks/useWails';
-import { Dialogs, Browser } from '@wailsio/runtime';
+import { Dialogs } from '@wailsio/runtime';
 
 interface Props {
   config: DashboardConfig;

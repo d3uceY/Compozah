@@ -14,7 +14,7 @@ import (
 // Version is the application version. Set at build time via:
 //
 //	-ldflags "-X main.Version=x.y.z"
-var Version = "0.2.0"
+var Version = "0.2.1"
 
 //go:embed all:frontend/dist
 var assets embed.FS

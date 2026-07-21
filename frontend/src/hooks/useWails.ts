@@ -2,7 +2,7 @@
 // Compozah Wails Service Bindings
 // ============================================================
 // Wails v3 generates typed bindings in frontend/bindings/.
-// Import directly from those — do NOT use window.go (that is Wails v2).
+// Import directly from those - do NOT use window.go (that is Wails v2).
 
 import type { WidgetInfo, ConnectionConfig, DashboardConfig, TableInfo, ColumnInfo } from '../types';
 

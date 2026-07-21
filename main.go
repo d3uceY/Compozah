@@ -34,7 +34,7 @@ func main() {
 
 	app := application.New(application.Options{
 		Name:        "Compozah",
-		Description: "Low-code dashboard builder — design dashboards and generate ASP.NET Core projects",
+		Description: "Low-code dashboard builder - design dashboards and generate ASP.NET Core projects",
 		Services: []application.Service{
 			application.NewService(&services.DatabaseService{}),
 			application.NewService(configSvc),

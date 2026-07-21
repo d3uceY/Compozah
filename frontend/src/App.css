@@ -1,5 +1,5 @@
 /* ============================================================
-   Compozah — Component Styles
+   Compozah - Component Styles
    ============================================================ */
 
 /* --- App Shell --- */
@@ -804,4 +804,69 @@
   color: var(--color-ink-muted-48);
   font-size: 14px;
   letter-spacing: -0.224px;
+}
+
+/* --- Paste Connection String --- */
+
+.paste-section {
+  margin-bottom: 20px;
+}
+
+.paste-area {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.paste-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--color-hairline);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", "Consolas", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.paste-textarea:focus {
+  border-color: var(--color-primary-focus);
+  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.18);
+}
+
+.paste-textarea::placeholder {
+  color: var(--color-ink-muted-48);
+  opacity: 0.6;
+}
+
+.raw-string-preview {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0, 102, 204, 0.05);
+  border: 1px solid rgba(0, 102, 204, 0.15);
+}
+
+.raw-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.raw-code {
+  display: block;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", "Consolas", monospace;
+  font-size: 12px;
+  color: var(--color-ink-muted-48);
+  word-break: break-all;
+  line-height: 1.4;
 }

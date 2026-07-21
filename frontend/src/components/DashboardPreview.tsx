@@ -59,7 +59,7 @@ export default function DashboardPreview({ config, onBack }: Props) {
                 <td><strong>{m.name}</strong></td>
                 <td><code>{m.column}</code></td>
                 <td>{m.aggregation.toUpperCase()}</td>
-                <td>{m.unit || '—'}</td>
+                <td>{m.unit || '-'}</td>
               </tr>
             ))}
           </tbody>

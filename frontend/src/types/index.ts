@@ -8,6 +8,7 @@ export interface ConnectionConfig {
   database: string;
   username: string;
   password: string;
+  connectionStringRaw: string;
 }
 
 export interface TableInfo {

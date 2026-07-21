@@ -16,19 +16,19 @@
 Compozah is a desktop application that streamlines building data dashboards from scratch.
 
 1. **Connect** to your SQL Server database
-2. **Explore** your schema — pick a table, map timestamp and machine columns
-3. **Define metrics** — attach aggregation logic (SUM, AVG, MIN, MAX, COUNT) to columns
-4. **Choose widgets** — drag and drop from 13 widget types (line charts, bar charts, KPIs, gauges, data tables, and more)
-5. **Generate** — Compozah produces a complete ASP.NET Core 8 project with Razor Pages, Chart.js dashboards, and a `Program.cs` wired to your database
+2. **Explore** your schema - pick a table, map timestamp and machine columns
+3. **Define metrics** - attach aggregation logic (SUM, AVG, MIN, MAX, COUNT) to columns
+4. **Choose widgets** - drag and drop from 13 widget types (line charts, bar charts, KPIs, gauges, data tables, and more)
+5. **Generate** - Compozah produces a complete ASP.NET Core 8 project with Razor Pages, Chart.js dashboards, and a `Program.cs` wired to your database
 
-The generated project is a standalone solution — open it in Visual Studio or `dotnet run` and it starts serving your dashboard immediately.
+The generated project is a standalone solution - open it in Visual Studio or `dotnet run` and it starts serving your dashboard immediately.
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
 | Desktop shell | Go + WebView2 |
-| Backend | Go — SQL Server via `go-mssqldb`, template engine, ZIP exporter |
+| Backend | Go - SQL Server via `go-mssqldb`, template engine, ZIP exporter |
 | Frontend | React 19, TypeScript 6, Vite 8 |
 | Generated output | ASP.NET Core 8, Razor Pages, Chart.js |
 
@@ -98,7 +98,7 @@ Compozah/
 
 ## Design
 
-The UI follows Apple's design language — SF Pro typography, parchment + white surfaces, a single Action Blue accent (#0066cc), pill-shaped CTAs, and edge-to-edge tiled sections. No emojis, no gradients, no decorative chrome. The product is the focus.
+The UI follows Apple's design language - SF Pro typography, parchment + white surfaces, a single Action Blue accent (#0066cc), pill-shaped CTAs, and edge-to-edge tiled sections. No emojis, no gradients, no decorative chrome. The product is the focus.
 
 ## Next Steps
 

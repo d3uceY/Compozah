@@ -67,6 +67,7 @@ export class ConnectionConfig {
     "database": string;
     "username": string;
     "password": string;
+    "connectionStringRaw": string;
 
     /** Creates a new ConnectionConfig instance. */
     constructor($$source: Partial<ConnectionConfig> = {}) {
@@ -84,6 +85,9 @@ export class ConnectionConfig {
         }
         if (!("password" in $$source)) {
             this["password"] = "";
+        }
+        if (!("connectionStringRaw" in $$source)) {
+            this["connectionStringRaw"] = "";
         }
 
         Object.assign(this, $$source);

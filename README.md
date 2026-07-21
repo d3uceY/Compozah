@@ -13,7 +13,7 @@
 
 ## What It Does
 
-Compozah is a Wails v3 desktop application that streamlines building data dashboards from scratch.
+Compozah is a desktop application that streamlines building data dashboards from scratch.
 
 1. **Connect** to your SQL Server database
 2. **Explore** your schema — pick a table, map timestamp and machine columns
@@ -27,7 +27,7 @@ The generated project is a standalone solution — open it in Visual Studio or `
 
 | Layer | Technology |
 |---|---|
-| Desktop shell | [Wails v3](https://wails.io) (Go + WebView2) |
+| Desktop shell | Go + WebView2 |
 | Backend | Go — SQL Server via `go-mssqldb`, template engine, ZIP exporter |
 | Frontend | React 19, TypeScript 6, Vite 8 |
 | Generated output | ASP.NET Core 8, Razor Pages, Chart.js |
@@ -38,7 +38,6 @@ The generated project is a standalone solution — open it in Visual Studio or `
 
 - Go 1.24+
 - Node.js 22+
-- [Wails v3 CLI](https://v3.wails.io/getting-started/installation)
 - WebView2 runtime (bundled with Windows 11; installable on Windows 10)
 
 ### Development
@@ -50,13 +49,13 @@ npm install
 cd ..
 
 # Run in dev mode (hot-reload for Go + frontend)
-wails3 dev
+task dev
 ```
 
 ### Production Build
 
 ```powershell
-wails3 build
+task build
 ```
 
 The executable lands in `bin/compozah.exe`.
@@ -69,7 +68,7 @@ Compozah/
 ├── models/                  # Go data models (ConnectionConfig, Metric, Widget, DashboardConfig)
 ├── services/                # Go services (database, config, template engine, generator, exporter)
 ├── templates/aspnet-core/   # ASP.NET Core project templates with {{placeholders}}
-├── build/                   # Wails build config, platform scripts, icons
+├── build/                   # Build config, platform scripts, icons
 ├── frontend/                # React + Vite frontend
 │   ├── src/
 │   │   ├── components/      # ConnectionPanel, SchemaExplorer, MetricMapper, WidgetPalette, GeneratePanel
@@ -104,8 +103,6 @@ The UI follows Apple's design language — SF Pro typography, parchment + white 
 ## Next Steps
 
 1. Modify the frontend in the `frontend/` directory to create your desired UI.
-2. Add backend functionality in `main.go`.
-3. Use `wails3 dev` to see your changes in real-time.
-4. When ready, build your application with `wails3 build`.
-
-Happy coding with Wails3! If you encounter any issues or have questions, don't hesitate to consult the documentation or reach out to the Wails community.
+2. Add backend functionality in `main.go` and the `services/` directory.
+3. Use `task dev` to see your changes in real-time.
+4. When ready, build your application with `task build`.

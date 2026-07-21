@@ -10,13 +10,13 @@
     <Installer
         Path="compozah.exe"
         Arguments=""
-        InstallLocation="C:\Program Files\My Company\My Product">
+        InstallLocation="C:\Program Files\github.com/d3uceY\Compozah">
     </Installer>
     <PackageInformation
-        PackageName="My Product"
-        PackageDisplayName="My Product"
-        PublisherName="CN=My Company"
-        PublisherDisplayName="My Company"
+        PackageName="Compozah"
+        PackageDisplayName="Compozah"
+        PublisherName="CN=github.com/d3uceY"
+        PublisherDisplayName="github.com/d3uceY"
         Version="0.1.0.0"
         PackageDescription="A Compozah application">
         <Capabilities>
@@ -27,7 +27,7 @@
             <Application
                 Id="com.example.compozah"
                 Description="A Compozah application"
-                DisplayName="My Product"
+                DisplayName="Compozah"
                 ExecutableName="compozah.exe"
                 EntryPoint="Windows.FullTrustApplication">
                 
@@ -41,8 +41,8 @@
         </Dependencies>
         <Properties>
             <Framework>false</Framework>
-            <DisplayName>My Product</DisplayName>
-            <PublisherDisplayName>My Company</PublisherDisplayName>
+            <DisplayName>Compozah</DisplayName>
+            <PublisherDisplayName>github.com/d3uceY</PublisherDisplayName>
             <Description>A Compozah application</Description>
             <Logo>Assets\AppIcon.png</Logo>
         </Properties>

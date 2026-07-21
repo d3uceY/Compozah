@@ -5,10 +5,10 @@
 	"info": {
 		"0000": {
 			"ProductVersion": "0.1.0",
-			"CompanyName": "My Company",
+			"CompanyName": "github.com/d3uceY",
 			"FileDescription": "A Compozah application",
-			"LegalCopyright": "© 2026, My Company",
-			"ProductName": "My Product",
+			"LegalCopyright": "© 2026, github.com/d3uceY",
+			"ProductName": "Compozah",
 			"Comments": "This is a comment"
 		}
 	}

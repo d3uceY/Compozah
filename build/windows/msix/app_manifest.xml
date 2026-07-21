@@ -9,13 +9,13 @@
   
   <Identity 
     Name="com.example.compozah"
-    Publisher="CN=My Company"
+    Publisher="CN=github.com/d3uceY"
     Version="0.1.0.0" 
     ProcessorArchitecture="x64" />
   
   <Properties>
-    <DisplayName>My Product</DisplayName>
-    <PublisherDisplayName>My Company</PublisherDisplayName>
+    <DisplayName>Compozah</DisplayName>
+    <PublisherDisplayName>github.com/d3uceY</PublisherDisplayName>
     <Description>A Compozah application</Description>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -31,7 +31,7 @@
   <Applications>
     <Application Id="com.example.compozah" Executable="compozah.exe" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
-        DisplayName="My Product"
+        DisplayName="Compozah"
         Description="A Compozah application"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"

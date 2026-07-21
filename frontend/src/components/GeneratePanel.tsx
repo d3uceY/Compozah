@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { DashboardConfig } from '../types';
 import { generateProject, exportToZip, saveDashboard } from '../hooks/useWails';
+import { Dialogs } from '@wailsio/runtime';
 
 interface Props {
   config: DashboardConfig;
@@ -13,6 +14,24 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
   const [generatedPath, setGeneratedPath] = useState<string | null>(null);
   const [zipPath, setZipPath] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const handleBrowse = async () => {
+    try {
+      const dir = await Dialogs.OpenFile({
+        Title: 'Choose output location for generated project',
+        CanChooseDirectories: true,
+        CanChooseFiles: false,
+        CanCreateDirectories: true,
+      });
+      if (dir) {
+        // OpenFile returns a string, but may return an array if multiple selection is on.
+        const path = Array.isArray(dir) ? dir[0] : dir;
+        if (path) onChange({ ...config, outputPath: path });
+      }
+    } catch {
+      // User cancelled or dialog not supported — ignore.
+    }
+  };
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -66,12 +85,18 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
         </div>
         <div className="form-group">
           <label>Output Path</label>
-          <input
-            type="text"
-            value={config.outputPath}
-            onChange={(e) => onChange({ ...config, outputPath: e.target.value })}
-            placeholder="./output"
-          />
+          <div className="path-input-row">
+            <input
+              type="text"
+              value={config.outputPath}
+              onChange={(e) => onChange({ ...config, outputPath: e.target.value })}
+              placeholder="Choose a folder..."
+              className="path-input"
+            />
+            <button className="btn btn-secondary btn-sm" onClick={handleBrowse} type="button">
+              Browse…
+            </button>
+          </div>
         </div>
         <div className="form-group">
           <label>Refresh Interval (seconds)</label>

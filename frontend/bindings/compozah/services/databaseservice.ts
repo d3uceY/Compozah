@@ -39,6 +39,8 @@ export function GetColumns(schema: string, table: string): $CancellablePromise<m
 
 /**
  * GetTables retrieves all user tables from the connected database.
+ * Excludes system schemas (sys, INFORMATION_SCHEMA, cdc) and MS replication
+ * tables that live in user databases but are managed by SQL Server.
  */
 export function GetTables(): $CancellablePromise<models$0.TableInfo[]> {
     return $Call.ByID(1512099106).then(($result: any) => {

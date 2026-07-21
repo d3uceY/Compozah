@@ -89,6 +89,69 @@ export default function GeneratePanel({ config, onChange, onBack }: Props) {
 
       {error && <div className="error-banner">{error}</div>}
 
+      {/* Preview */}
+      <div className="preview-section">
+        <h3>Project Preview</h3>
+        <div className="preview-grid">
+          <div className="preview-item">
+            <span className="preview-label">Project Name</span>
+            <span className="preview-value">{config.name || '—'}</span>
+          </div>
+          <div className="preview-item">
+            <span className="preview-label">Database</span>
+            <span className="preview-value">{config.connection.database || '(default)'}</span>
+          </div>
+          <div className="preview-item">
+            <span className="preview-label">Table</span>
+            <span className="preview-value">{config.tableName || '—'}</span>
+          </div>
+          <div className="preview-item">
+            <span className="preview-label">Output Path</span>
+            <span className="preview-value">{config.outputPath}/{config.name}</span>
+          </div>
+          <div className="preview-item">
+            <span className="preview-label">Refresh</span>
+            <span className="preview-value">Every {config.refreshSeconds}s</span>
+          </div>
+          <div className="preview-item">
+            <span className="preview-label">Metrics</span>
+            <span className="preview-value">{config.metrics.length > 0 ? `${config.metrics.length} defined` : '—'}</span>
+          </div>
+          <div className="preview-item">
+            <span className="preview-label">Widgets</span>
+            <span className="preview-value">{config.widgets.length > 0 ? `${config.widgets.length} placed` : '—'}</span>
+          </div>
+          <div className="preview-item">
+            <span className="preview-label">Authentication</span>
+            <span className="preview-value">{config.connection.username ? 'SQL Auth' : 'Windows Auth'}</span>
+          </div>
+        </div>
+        {config.metrics.length > 0 && (
+          <div className="preview-list">
+            <span className="preview-label">Metrics detail</span>
+            <ul>
+              {config.metrics.map((m) => (
+                <li key={m.name}>
+                  <strong>{m.name}</strong> — {m.aggregation}({m.column}){m.unit ? ` ${m.unit}` : ''}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {config.widgets.length > 0 && (
+          <div className="preview-list">
+            <span className="preview-label">Widgets detail</span>
+            <ul>
+              {config.widgets.map((w) => (
+                <li key={w.id}>
+                  <strong>{w.title}</strong> — {w.type.replace(/_/g, ' ')}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
       {generatedPath && (
         <div className="success-banner">
           <strong>Project generated successfully.</strong>

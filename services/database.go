@@ -52,6 +52,8 @@ func (d *DatabaseService) IsConnected() bool {
 }
 
 // GetTables retrieves all user tables from the connected database.
+// Excludes system schemas (sys, INFORMATION_SCHEMA, cdc) and MS replication
+// tables that live in user databases but are managed by SQL Server.
 func (d *DatabaseService) GetTables() ([]models.TableInfo, error) {
 	if d.db == nil {
 		return nil, fmt.Errorf("not connected to database")
@@ -61,6 +63,9 @@ func (d *DatabaseService) GetTables() ([]models.TableInfo, error) {
 		SELECT TABLE_SCHEMA, TABLE_NAME
 		FROM INFORMATION_SCHEMA.TABLES
 		WHERE TABLE_TYPE = 'BASE TABLE'
+		  AND TABLE_SCHEMA NOT IN ('sys', 'cdc', 'guest')
+		  AND TABLE_NAME NOT LIKE 'MSreplication_%'
+		  AND TABLE_NAME NOT LIKE 'spt_%'
 		ORDER BY TABLE_SCHEMA, TABLE_NAME
 	`
 

@@ -97,6 +97,11 @@ export default function ConnectionPanel({ config, onChange, onConnected }: Props
     setError(null);
   };
 
+  const handleClearRaw = () => {
+    onChange({ ...config, connectionStringRaw: '' });
+    setError(null);
+  };
+
   const handleConnect = async () => {
     if (!config.port || config.port < 1 || config.port > 65535) {
       setError('Port must be between 1 and 65535');
@@ -149,7 +154,12 @@ export default function ConnectionPanel({ config, onChange, onConnected }: Props
         )}
         {config.connectionStringRaw && (
           <div className="raw-string-preview">
-            <span className="raw-label">Using raw connection string</span>
+            <div className="raw-string-header">
+              <span className="raw-label">Using raw connection string</span>
+              <button className="btn-icon raw-clear-btn" onClick={handleClearRaw} title="Clear connection string">
+                ✕
+              </button>
+            </div>
             <code className="raw-code">{config.connectionStringRaw}</code>
           </div>
         )}
